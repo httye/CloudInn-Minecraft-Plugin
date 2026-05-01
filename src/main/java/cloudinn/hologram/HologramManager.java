@@ -1,19 +1,11 @@
 package cloudinn.hologram;
 
 import cloudinn.CloudInnPlugin;
-import net.minecraft.network.chat.IChatBaseComponent;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.PacketPlayOutEntityDestroy;
-import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
-import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.decoration.EntityArmorStand;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_20_R4.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R4.util.CraftChatMessage;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -66,18 +58,17 @@ public class HologramManager {
         for (int i = lines.size() - 1; i >= 0; i--) {
             String text = lines.get(i);
             Location lineLoc = location.clone().add(0, yOffset, 0);
-            
-            EntityArmorStand armorStand = new EntityArmorStand(
-                ((CraftWorld) location.getWorld()).getHandle(),
-                lineLoc.getX(), lineLoc.getY(), lineLoc.getZ()
-            );
-            
-            armorStand.setCustomName(CraftChatMessage.fromStringOrNull(convertColorCodes(text)));
+
+            ArmorStand armorStand = location.getWorld().spawn(lineLoc, ArmorStand.class);
+            armorStand.setCustomName(convertColorCodes(text));
             armorStand.setCustomNameVisible(true);
-            armorStand.setInvisible(true);
+            armorStand.setVisible(false);
             armorStand.setSmall(true);
             armorStand.setMarker(true);
-            armorStand.setNoGravity(true);
+            armorStand.setGravity(false);
+            armorStand.setCollidable(false);
+            armorStand.setInvulnerable(true);
+            armorStand.setCanPickupItems(false);
 
             HologramLine line = new HologramLine(armorStand, text);
             lineEntities.add(line);
@@ -85,19 +76,13 @@ public class HologramManager {
         }
 
         holograms.put(id, lineEntities);
-        
-        // 向所有在线玩家显示
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            showToPlayer(player, lineEntities);
-        }
     }
 
     public void removeHologram(String id) {
         List<HologramLine> lines = holograms.remove(id);
         if (lines != null) {
             for (HologramLine line : lines) {
-                PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(line.getArmorStand().getId());
-                sendPacketToAll(packet);
+                line.getArmorStand().remove();
             }
         }
     }
@@ -124,49 +109,15 @@ public class HologramManager {
                     .replace("{latency}", latency);
 
                 if (!line.getCurrentText().equals(formatted)) {
-                    line.getArmorStand().setCustomName(CraftChatMessage.fromStringOrNull(convertColorCodes(formatted)));
+                    line.getArmorStand().setCustomName(convertColorCodes(formatted));
                     line.setCurrentText(formatted);
-
-                    // 更新实体数据包
-                    PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(
-                        line.getArmorStand().getId(),
-                        line.getArmorStand().getDataWatcher(),
-                        true
-                    );
-                    sendPacketToAll(packet);
                 }
             }
         }
     }
 
     public void showToPlayer(Player player) {
-        for (List<HologramLine> lines : holograms.values()) {
-            showToPlayer(player, lines);
-        }
-    }
-
-    private void showToPlayer(Player player, List<HologramLine> lines) {
-        for (HologramLine line : lines) {
-            PacketPlayOutSpawnEntityLiving spawnPacket = new PacketPlayOutSpawnEntityLiving(line.getArmorStand());
-            sendPacket(player, spawnPacket);
-
-            PacketPlayOutEntityMetadata metaPacket = new PacketPlayOutEntityMetadata(
-                line.getArmorStand().getId(),
-                line.getArmorStand().getDataWatcher(),
-                true
-            );
-            sendPacket(player, metaPacket);
-        }
-    }
-
-    private void sendPacketToAll(Packet<?> packet) {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            sendPacket(player, packet);
-        }
-    }
-
-    private void sendPacket(Player player, Packet<?> packet) {
-        ((org.bukkit.craftbukkit.v1_20_R4.entity.CraftPlayer) player).getHandle().c.a(packet);
+        // 使用 Bukkit API 生成的实体默认对所有玩家可见，无需额外操作
     }
 
     private String convertColorCodes(String text) {
@@ -174,17 +125,17 @@ public class HologramManager {
     }
 
     public static class HologramLine {
-        private final EntityArmorStand armorStand;
+        private final ArmorStand armorStand;
         private final String rawText;
         private String currentText;
 
-        public HologramLine(EntityArmorStand armorStand, String rawText) {
+        public HologramLine(ArmorStand armorStand, String rawText) {
             this.armorStand = armorStand;
             this.rawText = rawText;
             this.currentText = "";
         }
 
-        public EntityArmorStand getArmorStand() { return armorStand; }
+        public ArmorStand getArmorStand() { return armorStand; }
         public String getRawText() { return rawText; }
         public String getCurrentText() { return currentText; }
         public void setCurrentText(String text) { this.currentText = text; }
