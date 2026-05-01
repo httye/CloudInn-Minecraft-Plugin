@@ -1,0 +1,35 @@
+name: CloudInn
+version: 1.0.0
+main: cloudinn.CloudInnPlugin
+api-version: 1.20
+author: CloudInn Team
+description: ✦ 云际驿站 - 悬浮字联动、称号系统、签到积分系统
+
+commands:
+  cloudinn:
+    description: 云际驿站主命令
+    aliases: [ci, inn]
+    usage: /<command> <reload|info>
+  title:
+    description: 称号系统管理
+    aliases: [titles, tag]
+    usage: /<command> <list|set|remove>
+  checkin:
+    description: 每日签到
+    aliases: [sign, daily]
+    usage: /<command>
+  points:
+    description: 查看积分
+    aliases: [point, score, coins]
+    usage: /<command> [player]
+
+permissions:
+  cloudinn.admin:
+    description: 云际驿站管理员权限
+    default: op
+  cloudinn.title.admin:
+    description: 称号管理权限
+    default: op
+  cloudinn.checkin.bypass:
+    description: 跳过签到限制
+    default: op

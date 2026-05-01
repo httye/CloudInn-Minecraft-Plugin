@@ -1,0 +1,53 @@
+# ✦ 云际驿站 CloudInn 插件配置
+
+# WebSocket 服务端地址（连接网页后端）
+websocket:
+  url: "ws://localhost:3000/ws/server"
+  reconnect-interval: 10  # 重连间隔（秒）
+
+# 服务器标识（与网页端服务器ID对应）
+server-id: 1
+server-name: "云际生存服"
+server-version: "1.20.4"
+
+# 悬浮字配置
+holograms:
+  enabled: true
+  positions:
+    - world: world
+      x: 0.5
+      y: 100.0
+      z: 0.5
+      lines:
+        - "&6&l✦ 云际驿站 CloudInn ✦"
+        - "&7━━━━━━━━━━━━━━"
+        - "&e在线人数: &f{online_players}&e/&f{max_players}"
+        - "&aTPS: &f{tps}"
+        - "&b延迟: &f{latency}ms"
+        - "&7━━━━━━━━━━━━━━"
+        - "&d每天签到 &f/checkin"
+        - "&d查看称号 &f/title list"
+
+# 称号系统配置
+titles:
+  max-titles: 10  # 玩家最大称号持有数
+  default-title: "&7云际旅人"
+
+# 签到系统配置
+checkin:
+  points-per-day: 10       # 每日签到积分
+  streak-bonus: 5          # 连续签到额外奖励
+  streak-bonus-interval: 7 # 每连续签到N天触发额外奖励
+  max-streak-days: 30      # 最大连续天数记录
+
+# 数据库配置
+database:
+  type: sqlite  # sqlite 或 mysql
+  sqlite:
+    file: "plugins/CloudInn/data.db"
+  mysql:
+    host: localhost
+    port: 3306
+    database: cloudinn
+    username: root
+    password: ""
