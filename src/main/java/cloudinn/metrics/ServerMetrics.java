@@ -45,7 +45,7 @@ public class ServerMetrics {
 
     public long getLatency() {
         // Average latency of online players
-        return Bukkit.getOnlinePlayers().stream()
+        return (long) Bukkit.getOnlinePlayers().stream()
             .mapToLong(p -> {
                 try {
                     return p.getPing();
@@ -54,8 +54,7 @@ public class ServerMetrics {
                 }
             })
             .average()
-            .orElse(0)
-            .longValue();
+            .orElse(0);
     }
 
     public int getOnlinePlayers() {
